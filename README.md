@@ -1,7 +1,7 @@
 <p align="center">
   <img src="git-assets/banner.png" width="1000">
 </p>
-
+---
 # 🌱 GrowBetter
 
 🇺🇸 English
@@ -55,7 +55,10 @@ v0.1 Pre-release
 More features, visual improvements and gameplay/progression systems are planned for future updates.
 
 ---
-
+<p align="center">
+  <img src="git-assets/banner.png" width="1000">
+</p>
+---
 🇧🇷 Português
 
 GrowBetter é um aplicativo de hábitos para iPhone e Apple Watch focado em progressão visual, consistência e crescimento pessoal.
