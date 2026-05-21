@@ -52,7 +52,9 @@ More features, visual improvements and gameplay/progression systems are planned 
 
 ## 📸 Preview
 
-Coming soon.
+<p align="center">
+  <img src="assets/banner.png" width="1000">
+</p>
 
 ---
 
