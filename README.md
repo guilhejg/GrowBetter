@@ -53,7 +53,7 @@ More features, visual improvements and gameplay/progression systems are planned 
 ## 📸 Preview
 
 <p align="center">
-  <img src="guilhejg/GrowBetter/git-assets/banner.png" width="1000">
+  <img src="git-assets/banner.png" width="1000">
 </p>
 
 ---
