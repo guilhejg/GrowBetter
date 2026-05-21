@@ -9,6 +9,7 @@ struct RootTabView: View {
 
     var body: some View {
         TabView(selection: $tab) {
+
             HomeView(selectedTab: $tab)
                 .tag(HTTab.habits)
                 .tabItem {
@@ -16,12 +17,13 @@ struct RootTabView: View {
                     Text("Hábitos")
                 }
 
-            JardimView()
-                .tag(HTTab.jardim)
-                .tabItem {
-                    Image(systemName: "leaf.fill")
-                    Text("Jardim")
-                }
+            GardenScreen()
+                           .tag(HTTab.jardim)
+                           .tabItem {
+                               Image(systemName: "leaf.fill")
+                               Text("Jardim")
+                           }
+
 
             StatsView()
                 .tag(HTTab.stats)
@@ -29,10 +31,13 @@ struct RootTabView: View {
                     Image(systemName: "chart.bar.fill")
                     Text("Stats")
                 }
-            GardenScreen()
-                .tabItem {
-                    Label("Jardim", systemImage: "leaf")
-                }
+        }
+        // ✅ SwiftUI: esconde o background do tab bar
+        .toolbarBackground(.hidden, for: .tabBar)
+
+        // ✅ iOS 26: re-aplica a transparência quando a view aparece
+        .onAppear {
+            HTAppearance.configureTabBarTransparent()
         }
     }
 }

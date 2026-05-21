@@ -2,36 +2,40 @@ import SwiftUI
 import SwiftData
 
 struct HomeView: View {
-    
+
     @Binding var selectedTab: HTTab
-    
+
     @Query(sort: \HTHabit.createdAt, order: .forward)
     private var habits: [HTHabit]
-    
+
     @State private var showingCreate = false
     @State private var selectedHabit: HTHabit?
-    
+    @Environment(\.modelContext) private var context
+
+    // ✅ sheet das configurações
+    @State private var showingSettings = false
+
     var body: some View {
         GeometryReader { geo in
             let safeTop = geo.safeAreaInsets.top
             let topTotal = HTConstants.topBarHeight + safeTop
-            
+
             ZStack(alignment: .top) {
                 Color.black.ignoresSafeArea()
-                
+
                 ScrollView {
                     VStack(spacing: 14) {
-                        
+
                         // Espaço reservado para a topbar
                         Color.clear
                             .frame(height: topTotal + 10)
-                        
+
                         if habits.isEmpty {
                             VStack(spacing: 10) {
                                 Text("Nenhum hábito ainda")
                                     .font(.system(size: 16, weight: .semibold))
                                     .foregroundStyle(.white.opacity(0.9))
-                                
+
                                 Text("Toque no + para criar o primeiro")
                                     .font(.system(size: 13))
                                     .foregroundStyle(.white.opacity(0.65))
@@ -45,13 +49,13 @@ struct HomeView: View {
                                     }
                             }
                         }
-                        
+
                         Spacer(minLength: 24)
                     }
                     .padding(.horizontal, 16)
                     .padding(.bottom, 24)
                 }
-                
+
                 topBar(safeTop: safeTop)
                     .frame(height: topTotal)
                     .frame(maxWidth: .infinity)
@@ -60,6 +64,8 @@ struct HomeView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+
+        // MARK: Sheets
         .sheet(isPresented: $showingCreate) {
             HTHabitEditorView(mode: .create)
         }
@@ -73,28 +79,62 @@ struct HomeView: View {
                 HTHabitEditorView(mode: .edit(h))
             }
         }
+        .sheet(isPresented: $showingSettings) {
+            SettingsView()
+        }
+
+        // MARK: Watch Bridge
+
+        .onAppear {
+            HTWatchBridge.shared.activateIfNeeded()
+            HTWatchBridge.shared.pushHabitsToWatch(habits: habits)
+        }
+
+        .onChange(of: habits) { _, newValue in
+            HTWatchBridge.shared.pushHabitsToWatch(habits: newValue)
+        }
+
+        // ✅ Watch pediu a lista (mensagem "request_habits" -> NotificationCenter)
+        .onReceive(NotificationCenter.default.publisher(for: .htWatchHabitsRequested)) { _ in
+            HTWatchBridge.shared.pushHabitsToWatch(habits: habits)
+        }
+
+        // ✅ Watch pediu toggle de um hábito (mensagem "toggle" -> NotificationCenter)
+        .onReceive(NotificationCenter.default.publisher(for: .htWatchToggleRequested)) { notif in
+            guard let id = notif.object as? String else { return }
+
+            // Faz o toggle no iPhone
+            HTWatchBridge.shared.handleToggleFromWatch(habitIDURI: id, modelContext: context)
+
+            // ✅ Re-push após o toggle (envia de novo a lista atual)
+            // Obs: como SwiftData atualiza o @Query, esse push pode acontecer antes do refresh visual.
+            // Para garantir, dispare um push no próximo ciclo da main thread:
+            DispatchQueue.main.async {
+                HTWatchBridge.shared.pushHabitsToWatch(habits: habits)
+            }
+        }
     }
-    
+
     // MARK: - Top Bar
-    
+
     private func topBar(safeTop: CGFloat) -> some View {
         HStack(spacing: 12) {
-            
+
             Button {
-                // Configurações futuramente
+                showingSettings = true
             } label: {
                 topCircleIcon("gearshape")
             }
             .buttonStyle(.plain)
-            
+
             Text("HabitTracker")
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(.white)
-            
+
             Spacer()
-            
+
             HStack(spacing: 12) {
-                
+
                 // 🔥 Vai para a aba Stats
                 Button {
                     selectedTab = .stats
@@ -104,7 +144,7 @@ struct HomeView: View {
                         .foregroundStyle(.white.opacity(0.9))
                 }
                 .buttonStyle(.plain)
-                
+
                 // ➕ Criar hábito
                 Button {
                     showingCreate = true
@@ -125,7 +165,7 @@ struct HomeView: View {
         .padding(.top, safeTop)
         .frame(height: HTConstants.topBarHeight + safeTop, alignment: .bottom)
     }
-    
+
     private func topCircleIcon(_ systemName: String) -> some View {
         Image(systemName: systemName)
             .font(.system(size: 16, weight: .semibold))
@@ -142,21 +182,21 @@ struct HomeView: View {
 // MARK: - Habit Row Container
 
 private struct HabitRowContainer: View {
-    
+
     let habit: HTHabit
-    
+
     @Query private var logs: [HTHabitLog]
-    
+
     init(habit: HTHabit) {
         self.habit = habit
-        
+
         let hid = habit.persistentModelID
-        
+
         _logs = Query(filter: #Predicate<HTHabitLog> { log in
             log.habit.persistentModelID == hid
         })
     }
-    
+
     var body: some View {
         HabitRowView(
             habit: habit,
