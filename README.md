@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="git-assets/banner.png" width="1000">
+</p>
+
 # 🌱 GrowBetter
 
 GrowBetter is a habit tracking app for iPhone and Apple Watch focused on visual progression, consistency and personal growth.
@@ -52,9 +56,7 @@ More features, visual improvements and gameplay/progression systems are planned 
 
 ## 📸 Preview
 
-<p align="center">
-  <img src="git-assets/banner.png" width="1000">
-</p>
+Coming soon.
 
 ---
 
