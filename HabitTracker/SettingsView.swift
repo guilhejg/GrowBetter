@@ -1,418 +1,704 @@
 import SwiftUI
 
-// MARK: - SettingsView (iOS Settings style)
+enum HTInterfaceScaleLevel: Double, CaseIterable, Identifiable {
+    case compact = 0.75
+    case comfortable = 0.85
+    case large = 1.0
 
-struct SettingsView: View {
+    var id: Double { rawValue }
 
-    // MARK: - "Perfil" (placeholder por enquanto)
-    @State private var displayName: String = "João Guilherme"
-    @State private var subtitle: String = "Conta HabitTracker"
-    @State private var profileImage: Image? = nil
-
-    // MARK: - Preferências do app
-    @State private var remindersEnabled: Bool = true
-    @State private var soundEnabled: Bool = true
-    @State private var confettiEnabled: Bool = true
-
-    @State private var theme: AppTheme = .system
-    @State private var hapticsEnabled: Bool = true
-
-    @State private var iCloudSyncEnabled: Bool = false
-    @State private var analyticsEnabled: Bool = false
-
-    var body: some View {
-        NavigationStack {
-            List {
-                // Top Profile Card
-                Section {
-                    profileRow
-                }
-
-                // Notificações
-                Section {
-                    NavigationLink {
-                        NotificationsSettingsView(
-                            remindersEnabled: $remindersEnabled,
-                            soundEnabled: $soundEnabled
-                        )
-                    } label: {
-                        SettingsRow(
-                            icon: "bell.fill",
-                            tint: .red,
-                            title: "Notificações",
-                            subtitle: remindersEnabled ? "Ativadas" : "Desativadas"
-                        )
-                    }
-
-                    Toggle(isOn: $confettiEnabled) {
-                        SettingsRow(
-                            icon: "sparkles",
-                            tint: .yellow,
-                            title: "Confete ao concluir",
-                            subtitle: "Animação ao marcar hábito"
-                        )
-                    }
-                } header: {
-                    Text("LEMBRETES")
-                }
-
-                // Aparência
-                Section {
-                    NavigationLink {
-                        AppearanceSettingsView(
-                            theme: $theme,
-                            hapticsEnabled: $hapticsEnabled
-                        )
-                    } label: {
-                        SettingsRow(
-                            icon: "paintbrush.fill",
-                            tint: .blue,
-                            title: "Aparência",
-                            subtitle: theme.displayName
-                        )
-                    }
-                } header: {
-                    Text("APARÊNCIA")
-                }
-
-                // Dados e backup
-                Section {
-                    Toggle(isOn: $iCloudSyncEnabled) {
-                        SettingsRow(
-                            icon: "icloud.fill",
-                            tint: .cyan,
-                            title: "Sincronizar com iCloud",
-                            subtitle: iCloudSyncEnabled ? "Ativado" : "Desativado"
-                        )
-                    }
-
-                    NavigationLink {
-                        DataBackupView()
-                    } label: {
-                        SettingsRow(
-                            icon: "externaldrive.fill",
-                            tint: .gray,
-                            title: "Backup e Exportação",
-                            subtitle: "Salvar / compartilhar seus hábitos"
-                        )
-                    }
-                } header: {
-                    Text("DADOS")
-                }
-
-                // Privacidade
-                Section {
-                    Toggle(isOn: $analyticsEnabled) {
-                        SettingsRow(
-                            icon: "chart.bar.xaxis",
-                            tint: .green,
-                            title: "Analytics (anônimo)",
-                            subtitle: "Ajuda a melhorar o app"
-                        )
-                    }
-
-                    NavigationLink {
-                        PrivacyView()
-                    } label: {
-                        SettingsRow(
-                            icon: "hand.raised.fill",
-                            tint: .indigo,
-                            title: "Privacidade",
-                            subtitle: "Permissões e dados"
-                        )
-                    }
-                } header: {
-                    Text("PRIVACIDADE")
-                }
-
-                // Suporte
-                Section {
-                    NavigationLink {
-                        HelpView()
-                    } label: {
-                        SettingsRow(
-                            icon: "questionmark.circle.fill",
-                            tint: .mint,
-                            title: "Ajuda",
-                            subtitle: "Dúvidas e dicas"
-                        )
-                    }
-
-                    NavigationLink {
-                        FeedbackView()
-                    } label: {
-                        SettingsRow(
-                            icon: "envelope.fill",
-                            tint: .orange,
-                            title: "Enviar feedback",
-                            subtitle: "Sugestões e bugs"
-                        )
-                    }
-                } header: {
-                    Text("SUPORTE")
-                }
-
-                // Sobre
-                Section {
-                    NavigationLink {
-                        AboutView()
-                    } label: {
-                        SettingsRow(
-                            icon: "info.circle.fill",
-                            tint: .secondary,
-                            title: "Sobre",
-                            subtitle: "Versão, termos, créditos"
-                        )
-                    }
-                }
-            }
-            .listStyle(.insetGrouped)
-            .scrollContentBackground(.hidden)
-            .background(Color.black.ignoresSafeArea())
-            .navigationTitle("Ajustes")
-            .navigationBarTitleDisplayMode(.large)
+    var title: String {
+        switch self {
+        case .compact: return "Compacto"
+        case .comfortable: return "Confortável"
+        case .large: return "Grande"
         }
     }
 
-    // MARK: - Profile Row (Card)
-    private var profileRow: some View {
-        HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(Color.white.opacity(0.10))
-                    .frame(width: 54, height: 54)
+    var subtitle: String {
+        switch self {
+        case .compact: return "Mais conteúdo na tela"
+        case .comfortable: return "Equilíbrio entre espaço e leitura"
+        case .large: return "Elementos no tamanho máximo"
+        }
+    }
 
-                if let profileImage {
-                    profileImage
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 54, height: 54)
-                        .clipShape(Circle())
-                } else {
-                    Image(systemName: "person.crop.circle.fill")
-                        .font(.system(size: 44))
-                        .foregroundStyle(Color.white.opacity(0.70))
+    var percentText: String {
+        "\(Int(rawValue * 100))%"
+    }
+
+    var summary: String {
+        "\(title) (\(percentText))"
+    }
+
+    static func nearest(to value: Double) -> HTInterfaceScaleLevel {
+        allCases.min { lhs, rhs in
+            abs(lhs.rawValue - value) < abs(rhs.rawValue - value)
+        } ?? .comfortable
+    }
+}
+
+struct SettingsView: View {
+    @AppStorage("appearance.uiScale") private var uiScale: Double = 0.85
+    @AppStorage("settings.darkMode") private var darkMode = true
+    @AppStorage("settings.notifications") private var notificationsEnabled = true
+    @AppStorage("settings.cloudSync") private var cloudSyncEnabled = false
+    @AppStorage("garden.presentationStyle") private var gardenStyle: GardenPresentationStyle = .visual
+
+    private let accent = Color(red: 0.39, green: 0.88, blue: 0.28)
+
+    private var scale: CGFloat {
+        CGFloat(min(max(uiScale, 0.75), 1.0))
+    }
+
+    private func scaled(_ value: CGFloat) -> CGFloat {
+        value * scale
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                background
+
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: scaled(22)) {
+                        header
+
+                        settingsSection("CONTA") {
+                            settingsRow(icon: "person.fill", title: "Perfil", subtitle: "Gerencie suas informações")
+                            divider
+                            settingsRow(icon: "shield.fill", title: "Segurança", subtitle: "Senha, Face ID e privacidade")
+                            divider
+                            settingsRow(
+                                icon: "icloud.fill",
+                                title: "Sincronização",
+                                subtitle: "Cópia de segurança e dados na nuvem",
+                                trailing: cloudSyncEnabled ? "Ativo" : "Inativo"
+                            )
+                        }
+
+                        settingsSection("PREFERÊNCIAS") {
+                            toggleRow(
+                                icon: "bell.fill",
+                                title: "Notificações",
+                                subtitle: "Gerencie lembretes e alertas",
+                                isOn: $notificationsEnabled
+                            )
+                            divider
+                            gardenRow
+                            divider
+                            scaleRow
+                            divider
+                            toggleRow(
+                                icon: "moon.fill",
+                                title: "Modo escuro",
+                                subtitle: darkMode ? "Ativado" : "Desativado",
+                                isOn: $darkMode
+                            )
+                            divider
+                            settingsRow(icon: "globe", title: "Idioma", subtitle: "Português (Brasil)")
+                        }
+
+                        settingsSection("GERAL") {
+                            settingsRow(icon: "questionmark.circle.fill", title: "Central de ajuda", subtitle: "Dúvidas frequentes e suporte")
+                            divider
+                            settingsRow(icon: "star.fill", title: "Avaliar o app", subtitle: "Sua opinião é importante")
+                            divider
+                            settingsRow(icon: "square.and.arrow.up", title: "Compartilhar o HabitTracker", subtitle: "Convide amigos para cultivar")
+                            divider
+                            settingsRow(icon: "info.circle.fill", title: "Sobre o HabitTracker", subtitle: "Versão 1.0.0")
+                        }
+
+                        Button {
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "rectangle.portrait.and.arrow.right")
+                                    .font(.system(size: scaled(20), weight: .semibold))
+                                Text("Sair da conta")
+                                    .font(.system(size: scaled(17), weight: .semibold))
+                            }
+                            .foregroundStyle(Color(red: 1.0, green: 0.32, blue: 0.28))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, scaled(18))
+                            .background(cardFill)
+                            .clipShape(RoundedRectangle(cornerRadius: scaled(22), style: .continuous))
+                            .overlay(cardStroke(cornerRadius: scaled(22)))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(.horizontal, scaled(18))
+                    .padding(.top, scaled(18))
+                    .padding(.bottom, scaled(28))
                 }
             }
+            .toolbar(.hidden, for: .navigationBar)
+            .preferredColorScheme(.dark)
+            .onAppear(perform: normalizeScale)
+        }
+    }
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(displayName)
-                    .font(.system(size: 18, weight: .semibold))
+    private var background: some View {
+        ZStack {
+            Color(red: 0.01, green: 0.03, blue: 0.035)
+                .ignoresSafeArea()
+
+            LinearGradient(
+                colors: [
+                    Color.green.opacity(0.10),
+                    Color.clear,
+                    Color.blue.opacity(0.04)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+        }
+    }
+
+    private var header: some View {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Ajustes")
+                    .font(.system(size: scaled(34), weight: .bold))
                     .foregroundStyle(.white)
 
-                Text(subtitle)
-                    .font(.system(size: 13))
-                    .foregroundStyle(.white.opacity(0.65))
-                    .lineLimit(1)
+                Text("Personalize sua experiência no HabitTracker.")
+                    .font(.system(size: scaled(16), weight: .medium))
+                    .foregroundStyle(.white.opacity(0.62))
             }
 
             Spacer()
 
-            Image(systemName: "chevron.right")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.35))
-        }
-        .padding(.vertical, 6)
-        .contentShape(Rectangle())
-        .onTapGesture {
-            // Futuro: abrir uma tela de "Conta" / "Perfil"
-            // onde o usuário edita nome e escolhe uma foto.
-        }
-    }
-}
-
-// MARK: - iOS Settings-like Row
-
-private struct SettingsRow: View {
-    let icon: String
-    let tint: Color
-    let title: String
-    let subtitle: String?
-
-    init(icon: String, tint: Color, title: String, subtitle: String? = nil) {
-        self.icon = icon
-        self.tint = tint
-        self.title = title
-        self.subtitle = subtitle
-    }
-
-    var body: some View {
-        HStack(spacing: 12) {
             ZStack {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(tint)
-                    .frame(width: 28, height: 28)
-                Image(systemName: icon)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.white)
-            }
+                Circle()
+                    .fill(Color.white.opacity(0.06))
+                    .frame(width: scaled(64), height: scaled(64))
+                    .overlay(Circle().strokeBorder(Color.white.opacity(0.08), lineWidth: 1))
 
-            VStack(alignment: .leading, spacing: 2) {
+                Image(systemName: "leaf.fill")
+                    .font(.system(size: scaled(28), weight: .bold))
+                    .foregroundStyle(accent)
+            }
+        }
+    }
+
+    private func settingsSection<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: scaled(10)) {
+            Text(title)
+                .font(.system(size: scaled(14), weight: .semibold))
+                .foregroundStyle(.white.opacity(0.58))
+                .padding(.leading, scaled(4))
+
+            VStack(spacing: 0) {
+                content()
+            }
+            .padding(.horizontal, scaled(14))
+            .padding(.vertical, scaled(10))
+            .background(cardFill)
+            .clipShape(RoundedRectangle(cornerRadius: scaled(22), style: .continuous))
+            .overlay(cardStroke(cornerRadius: scaled(22)))
+        }
+    }
+
+    private func settingsRow(icon: String, title: String, subtitle: String, trailing: String? = nil) -> some View {
+        HStack(spacing: scaled(14)) {
+            iconTile(icon)
+
+            VStack(alignment: .leading, spacing: 3) {
                 Text(title)
+                    .font(.system(size: scaled(17), weight: .semibold))
                     .foregroundStyle(.white)
 
-                if let subtitle {
-                    Text(subtitle)
-                        .font(.system(size: 12))
-                        .foregroundStyle(.white.opacity(0.55))
-                }
+                Text(subtitle)
+                    .font(.system(size: scaled(14), weight: .medium))
+                    .foregroundStyle(.white.opacity(0.58))
             }
+
+            Spacer()
+
+            if let trailing {
+                Text(trailing)
+                    .font(.system(size: scaled(15), weight: .semibold))
+                    .foregroundStyle(trailing == "Ativo" ? accent : .white.opacity(0.45))
+            }
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: scaled(15), weight: .semibold))
+                .foregroundStyle(.white.opacity(0.48))
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, scaled(10))
+        .contentShape(Rectangle())
+    }
+
+    private func toggleRow(icon: String, title: String, subtitle: String, isOn: Binding<Bool>) -> some View {
+        HStack(spacing: scaled(14)) {
+            iconTile(icon)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.system(size: scaled(17), weight: .semibold))
+                    .foregroundStyle(.white)
+
+                Text(subtitle)
+                    .font(.system(size: scaled(14), weight: .medium))
+                    .foregroundStyle(.white.opacity(0.58))
+            }
+
+            Spacer()
+
+            Toggle("", isOn: isOn)
+                .labelsHidden()
+                .tint(accent)
+        }
+        .padding(.vertical, scaled(10))
+    }
+
+    private var scaleRow: some View {
+        NavigationLink {
+            ScaleSettingsView()
+        } label: {
+            settingsRow(
+                icon: "textformat.size",
+                title: "Escala",
+                subtitle: "Tamanho da interface",
+                trailing: scaleLevel.summary
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var gardenRow: some View {
+        NavigationLink {
+            GardenSettingsView()
+        } label: {
+            settingsRow(
+                icon: "leaf.fill",
+                title: "Jardim",
+                subtitle: "Aparência e modo de exibição",
+                trailing: gardenStyle.title
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var scaleLevel: HTInterfaceScaleLevel {
+        HTInterfaceScaleLevel.nearest(to: uiScale)
+    }
+
+    private func normalizeScale() {
+        let normalized = scaleLevel.rawValue
+        if abs(uiScale - normalized) > 0.001 {
+            uiScale = normalized
+        }
+    }
+
+    private func iconTile(_ icon: String) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(accent.opacity(0.15))
+                .frame(width: scaled(42), height: scaled(42))
+
+            Image(systemName: icon)
+                .font(.system(size: scaled(18), weight: .semibold))
+                .foregroundStyle(accent)
+        }
+    }
+
+    private var divider: some View {
+        Rectangle()
+            .fill(Color.white.opacity(0.08))
+            .frame(height: 1)
+            .padding(.leading, scaled(56))
+    }
+
+    private var cardFill: some ShapeStyle {
+        LinearGradient(
+            colors: [
+                Color.white.opacity(0.07),
+                Color.white.opacity(0.04)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    private func cardStroke(cornerRadius: CGFloat) -> some View {
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
     }
 }
 
-// MARK: - Theme
+private struct GardenSettingsView: View {
+    @Environment(\.dismiss) private var dismiss
+    @AppStorage("appearance.uiScale") private var uiScale: Double = 0.85
+    @AppStorage("garden.presentationStyle") private var gardenStyle: GardenPresentationStyle = .visual
 
-enum AppTheme: String, CaseIterable, Identifiable {
-    case system, dark, light
+    private let accent = Color(red: 0.39, green: 0.88, blue: 0.28)
 
-    var id: String { rawValue }
-
-    var displayName: String {
-        switch self {
-        case .system: return "Sistema"
-        case .dark: return "Escuro"
-        case .light: return "Claro"
-        }
+    private var scale: CGFloat {
+        CGFloat(min(max(uiScale, 0.75), 1.0))
     }
-}
 
-// MARK: - Subscreens (placeholders prontos)
-
-private struct NotificationsSettingsView: View {
-    @Binding var remindersEnabled: Bool
-    @Binding var soundEnabled: Bool
+    private func scaled(_ value: CGFloat) -> CGFloat {
+        value * scale
+    }
 
     var body: some View {
-        List {
-            Section {
-                Toggle("Ativar lembretes", isOn: $remindersEnabled)
-                Toggle("Som", isOn: $soundEnabled)
-            } footer: {
-                Text("Você poderá adicionar múltiplos horários e visualizar todos em uma lista.")
-            }
+        ZStack {
+            background
 
-            Section {
-                NavigationLink("Horários de lembrete") {
-                    ReminderTimesView()
-                }
-            }
-        }
-        .listStyle(.insetGrouped)
-        .navigationTitle("Notificações")
-    }
-}
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: scaled(22)) {
+                    header
 
-private struct ReminderTimesView: View {
-    var body: some View {
-        List {
-            Section {
-                Text("Aqui vai a lista de horários (preview), com botão “Adicionar horário”.")
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .listStyle(.insetGrouped)
-        .navigationTitle("Horários")
-    }
-}
+                    VStack(spacing: 0) {
+                        ForEach(GardenPresentationStyle.allCases) { style in
+                            Button {
+                                gardenStyle = style
+                            } label: {
+                                optionRow(style)
+                            }
+                            .buttonStyle(.plain)
 
-private struct AppearanceSettingsView: View {
-    @Binding var theme: AppTheme
-    @Binding var hapticsEnabled: Bool
-
-    var body: some View {
-        List {
-            Section {
-                Picker("Tema", selection: $theme) {
-                    ForEach(AppTheme.allCases) { t in
-                        Text(t.displayName).tag(t)
+                            if style.id != GardenPresentationStyle.allCases.last?.id {
+                                divider
+                            }
+                        }
                     }
+                    .padding(.horizontal, scaled(14))
+                    .padding(.vertical, scaled(10))
+                    .background(cardFill)
+                    .clipShape(RoundedRectangle(cornerRadius: scaled(22), style: .continuous))
+                    .overlay(cardStroke(cornerRadius: scaled(22)))
+
+                    noteCard
                 }
-                Toggle("Hápticos", isOn: $hapticsEnabled)
+                .padding(.horizontal, scaled(18))
+                .padding(.top, scaled(18))
+                .padding(.bottom, scaled(28))
             }
         }
-        .listStyle(.insetGrouped)
-        .navigationTitle("Aparência")
+        .toolbar(.hidden, for: .navigationBar)
+        .preferredColorScheme(.dark)
+    }
+
+    private var background: some View {
+        ZStack {
+            Color(red: 0.01, green: 0.03, blue: 0.035)
+                .ignoresSafeArea()
+
+            LinearGradient(
+                colors: [
+                    Color.green.opacity(0.10),
+                    Color.clear,
+                    Color.blue.opacity(0.04)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+        }
+    }
+
+    private var header: some View {
+        HStack(alignment: .top, spacing: scaled(12)) {
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: scaled(18), weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: scaled(44), height: scaled(44))
+                    .background(Color.white.opacity(0.06))
+                    .clipShape(Circle())
+                    .overlay(Circle().strokeBorder(Color.white.opacity(0.08), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Jardim")
+                    .font(.system(size: scaled(34), weight: .bold))
+                    .foregroundStyle(.white)
+
+                Text("Escolha como a aba Jardim será exibida.")
+                    .font(.system(size: scaled(16), weight: .medium))
+                    .foregroundStyle(.white.opacity(0.62))
+                    .lineLimit(2)
+            }
+
+            Spacer()
+        }
+    }
+
+    private func optionRow(_ style: GardenPresentationStyle) -> some View {
+        HStack(spacing: scaled(14)) {
+            ZStack {
+                RoundedRectangle(cornerRadius: scaled(12), style: .continuous)
+                    .fill(accent.opacity(style == gardenStyle ? 0.22 : 0.12))
+                    .frame(width: scaled(42), height: scaled(42))
+
+                Image(systemName: style == .visual ? "photo.fill" : "square.grid.3x3.fill")
+                    .font(.system(size: scaled(17), weight: .bold))
+                    .foregroundStyle(accent)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(style.title)
+                    .font(.system(size: scaled(17), weight: .semibold))
+                    .foregroundStyle(.white)
+
+                Text(style.subtitle)
+                    .font(.system(size: scaled(14), weight: .medium))
+                    .foregroundStyle(.white.opacity(0.58))
+            }
+
+            Spacer()
+
+            Image(systemName: style == gardenStyle ? "checkmark.circle.fill" : "circle")
+                .font(.system(size: scaled(22), weight: .semibold))
+                .foregroundStyle(style == gardenStyle ? accent : .white.opacity(0.28))
+        }
+        .padding(.vertical, scaled(10))
+        .contentShape(Rectangle())
+    }
+
+    private var noteCard: some View {
+        HStack(spacing: scaled(12)) {
+            Image(systemName: "eye.slash.fill")
+                .font(.system(size: scaled(20), weight: .bold))
+                .foregroundStyle(accent)
+                .frame(width: scaled(44), height: scaled(44))
+                .background(accent.opacity(0.14))
+                .clipShape(RoundedRectangle(cornerRadius: scaled(14), style: .continuous))
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("A aba Jardim fica limpa")
+                    .font(.system(size: scaled(17), weight: .semibold))
+                    .foregroundStyle(.white)
+
+                Text("A troca de estilo aparece só aqui nos Ajustes.")
+                    .font(.system(size: scaled(14), weight: .medium))
+                    .foregroundStyle(.white.opacity(0.58))
+                    .lineLimit(2)
+            }
+        }
+        .padding(scaled(16))
+        .background(cardFill)
+        .clipShape(RoundedRectangle(cornerRadius: scaled(22), style: .continuous))
+        .overlay(cardStroke(cornerRadius: scaled(22)))
+    }
+
+    private var divider: some View {
+        Rectangle()
+            .fill(Color.white.opacity(0.08))
+            .frame(height: 1)
+            .padding(.leading, scaled(56))
+    }
+
+    private var cardFill: some ShapeStyle {
+        LinearGradient(
+            colors: [
+                Color.white.opacity(0.07),
+                Color.white.opacity(0.04)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    private func cardStroke(cornerRadius: CGFloat) -> some View {
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
     }
 }
 
-private struct DataBackupView: View {
-    var body: some View {
-        List {
-            Section {
-                Text("Exportar hábitos (JSON/CSV), importar, e backup local/iCloud.")
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .listStyle(.insetGrouped)
-        .navigationTitle("Backup e Exportação")
-    }
-}
+private struct ScaleSettingsView: View {
+    @Environment(\.dismiss) private var dismiss
+    @AppStorage("appearance.uiScale") private var uiScale: Double = 0.85
 
-private struct PrivacyView: View {
-    var body: some View {
-        List {
-            Section {
-                Text("Permissões (notificações), dados coletados, etc.")
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .listStyle(.insetGrouped)
-        .navigationTitle("Privacidade")
-    }
-}
+    private let accent = Color(red: 0.39, green: 0.88, blue: 0.28)
 
-private struct HelpView: View {
-    var body: some View {
-        List {
-            Section {
-                Text("FAQ e dicas rápidas.")
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .listStyle(.insetGrouped)
-        .navigationTitle("Ajuda")
+    private var scale: CGFloat {
+        CGFloat(min(max(uiScale, 0.75), 1.0))
     }
-}
 
-private struct FeedbackView: View {
-    var body: some View {
-        List {
-            Section {
-                Text("Enviar feedback (abre Mail / formulário).")
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .listStyle(.insetGrouped)
-        .navigationTitle("Feedback")
+    private func scaled(_ value: CGFloat) -> CGFloat {
+        value * scale
     }
-}
 
-private struct AboutView: View {
+    private var selectedLevel: HTInterfaceScaleLevel {
+        HTInterfaceScaleLevel.nearest(to: uiScale)
+    }
+
     var body: some View {
-        List {
-            Section {
-                HStack {
-                    Text("Versão")
-                    Spacer()
-                    Text("1.0.0")
-                        .foregroundStyle(.secondary)
+        ZStack {
+            background
+
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: scaled(22)) {
+                    header
+
+                    VStack(spacing: 0) {
+                        ForEach(HTInterfaceScaleLevel.allCases) { level in
+                            Button {
+                                uiScale = level.rawValue
+                            } label: {
+                                optionRow(level)
+                            }
+                            .buttonStyle(.plain)
+
+                            if level.id != HTInterfaceScaleLevel.allCases.last?.id {
+                                divider
+                            }
+                        }
+                    }
+                    .padding(.horizontal, scaled(14))
+                    .padding(.vertical, scaled(10))
+                    .background(cardFill)
+                    .clipShape(RoundedRectangle(cornerRadius: scaled(22), style: .continuous))
+                    .overlay(cardStroke(cornerRadius: scaled(22)))
+
+                    previewCard
                 }
-                HStack {
-                    Text("Build")
-                    Spacer()
-                    Text("1")
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            Section {
-                Text("Termos de uso, política de privacidade, créditos.")
-                    .foregroundStyle(.secondary)
+                .padding(.horizontal, scaled(18))
+                .padding(.top, scaled(18))
+                .padding(.bottom, scaled(28))
             }
         }
-        .listStyle(.insetGrouped)
-        .navigationTitle("Sobre")
+        .toolbar(.hidden, for: .navigationBar)
+        .preferredColorScheme(.dark)
+    }
+
+    private var background: some View {
+        ZStack {
+            Color(red: 0.01, green: 0.03, blue: 0.035)
+                .ignoresSafeArea()
+
+            LinearGradient(
+                colors: [
+                    Color.green.opacity(0.10),
+                    Color.clear,
+                    Color.blue.opacity(0.04)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+        }
+    }
+
+    private var header: some View {
+        HStack(alignment: .top, spacing: scaled(12)) {
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: scaled(18), weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: scaled(44), height: scaled(44))
+                    .background(Color.white.opacity(0.06))
+                    .clipShape(Circle())
+                    .overlay(Circle().strokeBorder(Color.white.opacity(0.08), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Escala")
+                    .font(.system(size: scaled(34), weight: .bold))
+                    .foregroundStyle(.white)
+
+                Text("Escolha o tamanho da interface do app.")
+                    .font(.system(size: scaled(16), weight: .medium))
+                    .foregroundStyle(.white.opacity(0.62))
+            }
+
+            Spacer()
+        }
+    }
+
+    private func optionRow(_ level: HTInterfaceScaleLevel) -> some View {
+        HStack(spacing: scaled(14)) {
+            ZStack {
+                RoundedRectangle(cornerRadius: scaled(12), style: .continuous)
+                    .fill(accent.opacity(level == selectedLevel ? 0.22 : 0.12))
+                    .frame(width: scaled(42), height: scaled(42))
+
+                Text(level.percentText)
+                    .font(.system(size: scaled(12), weight: .bold))
+                    .foregroundStyle(accent)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(level.title)
+                    .font(.system(size: scaled(17), weight: .semibold))
+                    .foregroundStyle(.white)
+
+                Text(level.subtitle)
+                    .font(.system(size: scaled(14), weight: .medium))
+                    .foregroundStyle(.white.opacity(0.58))
+            }
+
+            Spacer()
+
+            Image(systemName: level == selectedLevel ? "checkmark.circle.fill" : "circle")
+                .font(.system(size: scaled(22), weight: .semibold))
+                .foregroundStyle(level == selectedLevel ? accent : .white.opacity(0.28))
+        }
+        .padding(.vertical, scaled(10))
+        .contentShape(Rectangle())
+    }
+
+    private var previewCard: some View {
+        VStack(alignment: .leading, spacing: scaled(12)) {
+            Text("Prévia")
+                .font(.system(size: scaled(18), weight: .bold))
+                .foregroundStyle(.white)
+
+            HStack(spacing: scaled(12)) {
+                Image(systemName: "leaf.fill")
+                    .font(.system(size: scaled(24), weight: .bold))
+                    .foregroundStyle(accent)
+                    .frame(width: scaled(46), height: scaled(46))
+                    .background(accent.opacity(0.14))
+                    .clipShape(RoundedRectangle(cornerRadius: scaled(14), style: .continuous))
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(selectedLevel.summary)
+                        .font(.system(size: scaled(17), weight: .semibold))
+                        .foregroundStyle(.white)
+
+                    Text("Essa escala será aplicada em todas as abas.")
+                        .font(.system(size: scaled(14), weight: .medium))
+                        .foregroundStyle(.white.opacity(0.58))
+                }
+            }
+        }
+        .padding(scaled(16))
+        .background(cardFill)
+        .clipShape(RoundedRectangle(cornerRadius: scaled(22), style: .continuous))
+        .overlay(cardStroke(cornerRadius: scaled(22)))
+    }
+
+    private var divider: some View {
+        Rectangle()
+            .fill(Color.white.opacity(0.08))
+            .frame(height: 1)
+            .padding(.leading, scaled(56))
+    }
+
+    private var cardFill: some ShapeStyle {
+        LinearGradient(
+            colors: [
+                Color.white.opacity(0.07),
+                Color.white.opacity(0.04)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    private func cardStroke(cornerRadius: CGFloat) -> some View {
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
     }
 }

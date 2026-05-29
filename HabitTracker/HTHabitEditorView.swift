@@ -120,7 +120,7 @@ struct HTHabitEditorView: View {
 
             Spacer()
 
-            Text("Habit Editor")
+            Text("Editor de Hábito")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.white)
 
@@ -178,11 +178,11 @@ struct HTHabitEditorView: View {
         .frame(height: maxHeight)
     }
 
-    // MARK: - STYLE
+    // MARK: - Estilo
 
     private var stylePanel: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("STYLE")
+            Text("ESTILO")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.55))
 
@@ -207,7 +207,7 @@ struct HTHabitEditorView: View {
         ]
 
         return VStack(alignment: .leading, spacing: 10) {
-            Text("Icon")
+            Text("Ícone")
                 .foregroundStyle(.white.opacity(0.9))
 
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 5), spacing: 10) {
@@ -230,7 +230,7 @@ struct HTHabitEditorView: View {
 
     private var colorPicker: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Color")
+            Text("Cor")
                 .foregroundStyle(.white.opacity(0.9))
 
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 7), spacing: 12) {
@@ -254,22 +254,22 @@ struct HTHabitEditorView: View {
         }
     }
 
-    // MARK: - OPTIONS
+    // MARK: - Opções
 
     private var optionsPanel: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("OPTIONS")
+            Text("OPÇÕES")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.55))
 
             VStack(spacing: 0) {
                 rowTheme
                 divider
-                rowToggle(title: "Show Completion Indicator", isOn: $showCompletionIndicator)
+                rowToggle(title: "Mostrar indicador de conclusão", isOn: $showCompletionIndicator)
                 divider
-                rowToggle(title: "Show Description", isOn: $showDescription)
+                rowToggle(title: "Mostrar descrição", isOn: $showDescription)
                 divider
-                rowToggle(title: "Show Streak", isOn: $showStreak)
+                rowToggle(title: "Mostrar sequência", isOn: $showStreak)
             }
             .padding(14)
             .background(Color.white.opacity(0.10))
@@ -283,12 +283,12 @@ struct HTHabitEditorView: View {
 
     private var rowTheme: some View {
         HStack {
-            Text("Theme")
+            Text("Tema")
                 .foregroundStyle(.white.opacity(0.9))
             Spacer()
             Picker("", selection: $themeIsDark) {
-                Text("Light").tag(false)
-                Text("Dark").tag(true)
+                Text("Claro").tag(false)
+                Text("Escuro").tag(true)
             }
             .pickerStyle(.segmented)
             .frame(width: 170)
