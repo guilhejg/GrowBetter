@@ -9,6 +9,10 @@ struct RootTabView: View {
     @State private var tab: HTTab = .habits
     @AppStorage("appearance.uiScale") private var uiScale: Double = 0.85
 
+    init(initialTab: HTTab = .habits) {
+        _tab = State(initialValue: initialTab)
+    }
+
     var body: some View {
         TabView(selection: $tab) {
 

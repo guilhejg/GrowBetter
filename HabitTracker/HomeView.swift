@@ -14,6 +14,7 @@ struct HomeView: View {
     @Environment(\.modelContext) private var context
 
     @AppStorage("appearance.uiScale") private var uiScale: Double = 0.85
+    @AppStorage(HTAccountSession.displayNameKey) private var displayName = ""
 
     @State private var showingCreate = false
     @State private var selectedHabit: HTHabit?
@@ -24,6 +25,11 @@ struct HomeView: View {
 
     private func scaled(_ value: CGFloat) -> CGFloat {
         value * scale
+    }
+
+    private var greetingName: String {
+        let trimmedName = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedName.isEmpty ? "jardineiro" : trimmedName
     }
 
     var body: some View {
@@ -91,27 +97,13 @@ struct HomeView: View {
     // MARK: - Layout
 
     private var homeBackground: some View {
-        ZStack {
-            Color(red: 0.01, green: 0.03, blue: 0.035)
-                .ignoresSafeArea()
-
-            LinearGradient(
-                colors: [
-                    Color.green.opacity(0.11),
-                    Color.clear,
-                    Color.blue.opacity(0.05)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-        }
+        HTAppBackground()
     }
 
     private var header: some View {
         HStack(alignment: .top, spacing: scaled(14)) {
             VStack(alignment: .leading, spacing: 6) {
-                Text("Bom dia, João! 🌱")
+                Text("Bom dia, \(greetingName)! 🌱")
                     .font(.system(size: scaled(30), weight: .bold))
                     .foregroundStyle(.white)
                     .lineLimit(1)
@@ -389,26 +381,30 @@ private struct HomeHabitCard: View {
         StatsEngine.currentStreak(from: logs)
     }
 
+    private var completedDays: Set<Date> {
+        Set(logs.map { Calendar.current.startOfDay(for: $0.date) })
+    }
+
     var body: some View {
-        HStack(spacing: scaled(12)) {
-            iconTile
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text(habit.name)
-                    .font(.system(size: scaled(19), weight: .bold))
-                    .foregroundStyle(.white)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-
-                Text(habit.detailText.isEmpty ? "Sem descrição" : habit.detailText)
-                    .font(.system(size: scaled(14), weight: .medium))
-                    .foregroundStyle(Color.white.opacity(0.62))
-                    .lineLimit(1)
-            }
-
-            Spacer(minLength: 10)
-
+        VStack(spacing: scaled(10)) {
             HStack(spacing: scaled(12)) {
+                iconTile
+
+                VStack(alignment: .leading, spacing: scaled(4)) {
+                    Text(habit.name)
+                        .font(.system(size: scaled(17), weight: .semibold))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+
+                    Text(habit.detailText.isEmpty ? "Descrição do hábito" : habit.detailText)
+                        .font(.system(size: scaled(13), weight: .regular))
+                        .foregroundStyle(Color.white.opacity(0.70))
+                        .lineLimit(1)
+                }
+
+                Spacer(minLength: scaled(10))
+
                 Text("🔥 \(max(streak, 0)) dias")
                     .font(.system(size: scaled(14), weight: .bold))
                     .foregroundStyle(Color(red: 1.0, green: 0.38, blue: 0.18))
@@ -418,52 +414,55 @@ private struct HomeHabitCard: View {
                 Button {
                     toggleToday()
                 } label: {
-                    ZStack {
-                        Circle()
-                            .fill(completedToday ? Color(red: 0.35, green: 0.84, blue: 0.25) : Color.clear)
-                            .frame(width: scaled(40), height: scaled(40))
-                            .overlay(
-                                Circle()
-                                    .strokeBorder(completedToday ? Color.clear : Color.white.opacity(0.20), lineWidth: 4)
-                            )
-
-                        if completedToday {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: scaled(19), weight: .bold))
-                                .foregroundStyle(.white)
-                        }
-                    }
-                    .scaleEffect(bounce ? 1.08 : 1.0)
-                    .animation(.spring(response: 0.24, dampingFraction: 0.58), value: bounce)
+                    completionTile
                 }
                 .buttonStyle(.plain)
             }
+
+            HTHeatmapView(
+                color: accent,
+                completedDays: completedDays,
+                weeks: HTConstants.heatmapWeeks,
+                mostRecentFirst: true
+            )
         }
-        .padding(.horizontal, scaled(14))
-        .padding(.vertical, scaled(13))
-        .frame(minHeight: scaled(82))
+        .padding(scaled(12))
         .background(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(Color.white.opacity(0.055))
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(Color.white.opacity(0.10))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
         )
-        .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .onTapGesture(perform: onEdit)
     }
 
     private var iconTile: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(accent.opacity(0.22))
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.white.opacity(0.10))
 
             Image(systemName: habit.iconName)
-                .font(.system(size: scaled(24), weight: .bold))
-                .foregroundStyle(accent)
+                .font(.system(size: scaled(18), weight: .semibold))
+                .foregroundStyle(.white.opacity(0.95))
         }
-        .frame(width: scaled(58), height: scaled(58))
+        .frame(width: scaled(44), height: scaled(44))
+    }
+
+    private var completionTile: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(completedToday ? accent : Color.white.opacity(0.12))
+
+            Image(systemName: "checkmark")
+                .font(.system(size: scaled(18), weight: .bold))
+                .foregroundStyle(completedToday ? .black.opacity(0.85) : .white.opacity(0.75))
+        }
+        .frame(width: scaled(44), height: scaled(44))
+        .scaleEffect(bounce ? 1.08 : 1.0)
+        .animation(.spring(response: 0.24, dampingFraction: 0.58), value: bounce)
     }
 
     private func toggleToday() {

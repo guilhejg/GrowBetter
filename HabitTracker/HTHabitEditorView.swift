@@ -22,7 +22,7 @@ struct HTHabitEditorView: View {
     @State private var squareFormat: Bool = true
     @State private var showCompletionIndicator: Bool = true
     @State private var showDescription: Bool = true
-    @State private var showStreak: Bool = false
+    @State private var showStreak: Bool = true
 
     @State private var editingTitle = false
     @State private var editingSubtitle = false
@@ -66,7 +66,7 @@ struct HTHabitEditorView: View {
             let previewMaxHeight = min(baseHeight * 0.44, 520)
 
             ZStack {
-                Color.black.ignoresSafeArea()
+                HTAppBackground()
 
                 ScrollView {
                     VStack(spacing: 18) {
@@ -164,6 +164,8 @@ struct HTHabitEditorView: View {
                 weeks: HTConstants.heatmapWeeks,
                 showCompletionIndicator: showCompletionIndicator,
                 showDescription: showDescription,
+                showStreak: showStreak,
+                streak: StatsEngine.currentStreak(from: logs),
                 allowInlineEdit: true,
                 editingTitle: $editingTitle,
                 editingSubtitle: $editingSubtitle,
@@ -389,6 +391,8 @@ struct HTHabitEditorView: View {
             weeks: HTConstants.heatmapWeeks,     // ✅ mesmo da Home
             showCompletionIndicator: showCompletionIndicator,
             showDescription: showDescription,
+            showStreak: showStreak,
+            streak: StatsEngine.currentStreak(from: logs),
             isDark: themeIsDark
         )
         .frame(width: exportSize.width, height: exportSize.height)
@@ -436,6 +440,8 @@ private struct PreviewCanvas: View {
     let weeks: Int
     let showCompletionIndicator: Bool
     let showDescription: Bool
+    let showStreak: Bool
+    let streak: Int
 
     let allowInlineEdit: Bool
     @Binding var editingTitle: Bool
@@ -547,6 +553,10 @@ private struct PreviewCanvas: View {
 
                 Spacer()
 
+                if showStreak {
+                    streakBadge
+                }
+
                 if showCompletionIndicator {
                     completionBox
                 }
@@ -582,6 +592,14 @@ private struct PreviewCanvas: View {
         .frame(width: 44, height: 44)
     }
 
+    private var streakBadge: some View {
+        Text("🔥 \(max(streak, 0)) dias")
+            .font(.system(size: 14, weight: .bold))
+            .foregroundStyle(Color(red: 1.0, green: 0.38, blue: 0.18))
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
+    }
+
     private var completionBox: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -605,6 +623,8 @@ private struct PreviewCanvasExport: View {
     let weeks: Int
     let showCompletionIndicator: Bool
     let showDescription: Bool
+    let showStreak: Bool
+    let streak: Int
     let isDark: Bool
 
     var body: some View {
@@ -640,6 +660,14 @@ private struct PreviewCanvasExport: View {
                         }
 
                         Spacer()
+
+                        if showStreak {
+                            Text("🔥 \(max(streak, 0)) dias")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundStyle(Color(red: 1.0, green: 0.38, blue: 0.18))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
+                        }
 
                         if showCompletionIndicator {
                             ZStack {

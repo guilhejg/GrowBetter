@@ -34,7 +34,7 @@ struct HTConfettiView: View {
                 position: origin,
                 size: CGSize(width: CGFloat.random(in: 5...10), height: CGFloat.random(in: 7...14)),
                 rotation: Double.random(in: 0...360),
-                color: palette.randomElement()!.opacity(0.95),
+                color: (palette.randomElement() ?? .green).opacity(0.95),
                 opacity: 1
             )
         }

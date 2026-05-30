@@ -23,6 +23,9 @@ final class HTWatchBridge: NSObject, ObservableObject {
     // MARK: - Session
 
     func activateIfNeeded() {
+        #if DEBUG
+        return
+        #else
         guard WCSession.isSupported() else { return }
 
         let session = WCSession.default
@@ -33,11 +36,15 @@ final class HTWatchBridge: NSObject, ObservableObject {
         if session.activationState != .activated {
             session.activate()
         }
+        #endif
     }
 
     // MARK: - Push habits to Watch
 
     func pushHabitsToWatch(habits: [HTHabit]) {
+        #if DEBUG
+        return
+        #else
         guard WCSession.isSupported() else { return }
 
         let session = WCSession.default
@@ -64,11 +71,15 @@ final class HTWatchBridge: NSObject, ObservableObject {
             // fallback: mantém um estado “último conhecido” no watch
             try? session.updateApplicationContext(message)
         }
+        #endif
     }
 
     // MARK: - Handle toggle from Watch (called by HomeView)
 
     func handleToggleFromWatch(habitIDURI: String, modelContext: ModelContext) {
+        #if DEBUG
+        return
+        #else
         // ✅ match pela string gerada do PersistentIdentifier
         do {
             let habits = try modelContext.fetch(FetchDescriptor<HTHabit>())
@@ -80,6 +91,7 @@ final class HTWatchBridge: NSObject, ObservableObject {
         } catch {
             print("HTWatchBridge handleToggleFromWatch fetch error:", error)
         }
+        #endif
     }
 
     private func toggleToday(for habit: HTHabit, modelContext: ModelContext) {

@@ -22,6 +22,10 @@ struct StatsView: View {
         value * scale
     }
 
+    private var pairedChartCardHeight: CGFloat {
+        scaled(258)
+    }
+
     var body: some View {
         ZStack {
             background
@@ -50,21 +54,7 @@ struct StatsView: View {
     }
 
     private var background: some View {
-        ZStack {
-            Color(red: 0.01, green: 0.03, blue: 0.035)
-                .ignoresSafeArea()
-
-            LinearGradient(
-                colors: [
-                    Color.green.opacity(0.10),
-                    Color.clear,
-                    Color.blue.opacity(0.04)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-        }
+        HTAppBackground()
     }
 
     private var header: some View {
@@ -221,6 +211,7 @@ struct StatsView: View {
         }
         .padding(scaled(16))
         .frame(maxWidth: .infinity)
+        .frame(height: pairedChartCardHeight, alignment: .top)
         .background(cardFill)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .overlay(cardStroke(22))
@@ -268,6 +259,7 @@ struct StatsView: View {
         }
         .padding(scaled(16))
         .frame(maxWidth: .infinity)
+        .frame(height: pairedChartCardHeight, alignment: .top)
         .background(cardFill)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .overlay(cardStroke(22))

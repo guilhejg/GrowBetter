@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		2BE06A502F48AC07004FF349 /* HabitTracker - Apple Watch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 2BE06A302F48AC05004FF349 /* HabitTracker - Apple Watch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		2B79D8C42F4725F5005DEE18 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -39,28 +35,7 @@
 			remoteGlobalIDString = 2BE06A2F2F48AC05004FF349;
 			remoteInfo = "HabitTracker - Apple Watch Watch App";
 		};
-		2BE06A4E2F48AC07004FF349 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 2B79D8AC2F4725F3005DEE18 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 2BE06A2F2F48AC05004FF349;
-			remoteInfo = "HabitTracker - Apple Watch Watch App";
-		};
 /* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		2BE06A542F48AC07004FF349 /* Embed Watch Content */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
-			dstSubfolderSpec = 16;
-			files = (
-				2BE06A502F48AC07004FF349 /* HabitTracker - Apple Watch Watch App.app in Embed Watch Content */,
-			);
-			name = "Embed Watch Content";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		2B79D8B42F4725F3005DEE18 /* HabitTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HabitTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -186,12 +161,10 @@
 				2B79D8B02F4725F3005DEE18 /* Sources */,
 				2B79D8B12F4725F3005DEE18 /* Frameworks */,
 				2B79D8B22F4725F3005DEE18 /* Resources */,
-				2BE06A542F48AC07004FF349 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				2BE06A4F2F48AC07004FF349 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				2B79D8B62F4725F3005DEE18 /* HabitTracker */,
@@ -487,11 +460,6 @@
 			target = 2BE06A2F2F48AC05004FF349 /* HabitTracker - Apple Watch Watch App */;
 			targetProxy = 2BE06A472F48AC07004FF349 /* PBXContainerItemProxy */;
 		};
-		2BE06A4F2F48AC07004FF349 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 2BE06A2F2F48AC05004FF349 /* HabitTracker - Apple Watch Watch App */;
-			targetProxy = 2BE06A4E2F48AC07004FF349 /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -629,7 +597,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -663,7 +631,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (

@@ -44,6 +44,11 @@ struct SettingsView: View {
     @AppStorage("settings.notifications") private var notificationsEnabled = true
     @AppStorage("settings.cloudSync") private var cloudSyncEnabled = false
     @AppStorage("garden.presentationStyle") private var gardenStyle: GardenPresentationStyle = .visual
+    @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
+    @AppStorage("farm.coins") private var farmCoins = 80
+    @AppStorage(HTAccountSession.isSignedInKey) private var isSignedIn = false
+    @AppStorage(HTAccountSession.displayNameKey) private var accountDisplayName = ""
+    @AppStorage(HTAccountSession.emailKey) private var accountEmail = ""
 
     private let accent = Color(red: 0.39, green: 0.88, blue: 0.28)
 
@@ -65,7 +70,7 @@ struct SettingsView: View {
                         header
 
                         settingsSection("CONTA") {
-                            settingsRow(icon: "person.fill", title: "Perfil", subtitle: "Gerencie suas informações")
+                            settingsRow(icon: "person.fill", title: "Perfil", subtitle: accountSubtitle)
                             divider
                             settingsRow(icon: "shield.fill", title: "Segurança", subtitle: "Senha, Face ID e privacidade")
                             divider
@@ -109,22 +114,40 @@ struct SettingsView: View {
                             settingsRow(icon: "info.circle.fill", title: "Sobre o HabitTracker", subtitle: "Versão 1.0.0")
                         }
 
-                        Button {
-                        } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: "rectangle.portrait.and.arrow.right")
-                                    .font(.system(size: scaled(20), weight: .semibold))
-                                Text("Sair da conta")
-                                    .font(.system(size: scaled(17), weight: .semibold))
+                        settingsSection("TESTES") {
+                            coinTestRow
+                            divider
+                            Button {
+                                hasSeenWelcome = false
+                            } label: {
+                                settingsRow(
+                                    icon: "sparkles",
+                                    title: "Tela de boas-vindas",
+                                    subtitle: "Reabrir onboarding para testes"
+                                )
                             }
-                            .foregroundStyle(Color(red: 1.0, green: 0.32, blue: 0.28))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, scaled(18))
-                            .background(cardFill)
-                            .clipShape(RoundedRectangle(cornerRadius: scaled(22), style: .continuous))
-                            .overlay(cardStroke(cornerRadius: scaled(22)))
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
+
+                        if isSignedIn {
+                            Button {
+                                HTAccountSession.signOut()
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                                        .font(.system(size: scaled(20), weight: .semibold))
+                                    Text("Sair da conta")
+                                        .font(.system(size: scaled(17), weight: .semibold))
+                                }
+                                .foregroundStyle(Color(red: 1.0, green: 0.32, blue: 0.28))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, scaled(18))
+                                .background(cardFill)
+                                .clipShape(RoundedRectangle(cornerRadius: scaled(22), style: .continuous))
+                                .overlay(cardStroke(cornerRadius: scaled(22)))
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
                     .padding(.horizontal, scaled(18))
                     .padding(.top, scaled(18))
@@ -138,21 +161,27 @@ struct SettingsView: View {
     }
 
     private var background: some View {
-        ZStack {
-            Color(red: 0.01, green: 0.03, blue: 0.035)
-                .ignoresSafeArea()
+        HTAppBackground()
+    }
 
-            LinearGradient(
-                colors: [
-                    Color.green.opacity(0.10),
-                    Color.clear,
-                    Color.blue.opacity(0.04)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+    private var accountSubtitle: String {
+        if isSignedIn {
+            if accountDisplayName.isEmpty == false {
+                return accountDisplayName
+            }
+
+            if accountEmail.isEmpty == false {
+                return accountEmail
+            }
+
+            return "Conectado com Apple"
         }
+
+        if accountDisplayName.isEmpty == false {
+            return "\(accountDisplayName) · convidado"
+        }
+
+        return "Conta local neste iPhone"
     }
 
     private var header: some View {
@@ -281,6 +310,20 @@ struct SettingsView: View {
         .buttonStyle(.plain)
     }
 
+    private var coinTestRow: some View {
+        NavigationLink {
+            CoinSettingsView()
+        } label: {
+            settingsRow(
+                icon: "circle.hexagongrid.fill",
+                title: "Moedas",
+                subtitle: "Alterar saldo para testes",
+                trailing: "\(farmCoins)"
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
     private var scaleLevel: HTInterfaceScaleLevel {
         HTInterfaceScaleLevel.nearest(to: uiScale)
     }
@@ -383,21 +426,7 @@ private struct GardenSettingsView: View {
     }
 
     private var background: some View {
-        ZStack {
-            Color(red: 0.01, green: 0.03, blue: 0.035)
-                .ignoresSafeArea()
-
-            LinearGradient(
-                colors: [
-                    Color.green.opacity(0.10),
-                    Color.clear,
-                    Color.blue.opacity(0.04)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-        }
+        HTAppBackground()
     }
 
     private var header: some View {
@@ -570,21 +599,7 @@ private struct ScaleSettingsView: View {
     }
 
     private var background: some View {
-        ZStack {
-            Color(red: 0.01, green: 0.03, blue: 0.035)
-                .ignoresSafeArea()
-
-            LinearGradient(
-                colors: [
-                    Color.green.opacity(0.10),
-                    Color.clear,
-                    Color.blue.opacity(0.04)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-        }
+        HTAppBackground()
     }
 
     private var header: some View {
@@ -684,6 +699,190 @@ private struct ScaleSettingsView: View {
             .fill(Color.white.opacity(0.08))
             .frame(height: 1)
             .padding(.leading, scaled(56))
+    }
+
+    private var cardFill: some ShapeStyle {
+        LinearGradient(
+            colors: [
+                Color.white.opacity(0.07),
+                Color.white.opacity(0.04)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    private func cardStroke(cornerRadius: CGFloat) -> some View {
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
+    }
+}
+
+private struct CoinSettingsView: View {
+    @Environment(\.dismiss) private var dismiss
+    @AppStorage("appearance.uiScale") private var uiScale: Double = 0.85
+    @AppStorage("farm.coins") private var farmCoins = 80
+
+    @State private var coinText = ""
+
+    private let accent = Color(red: 0.39, green: 0.88, blue: 0.28)
+
+    private var scale: CGFloat {
+        CGFloat(min(max(uiScale, 0.75), 1.0))
+    }
+
+    private func scaled(_ value: CGFloat) -> CGFloat {
+        value * scale
+    }
+
+    var body: some View {
+        ZStack {
+            background
+
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: scaled(22)) {
+                    header
+                    editorCard
+                    presetCard
+                }
+                .padding(.horizontal, scaled(18))
+                .padding(.top, scaled(18))
+                .padding(.bottom, scaled(28))
+            }
+        }
+        .toolbar(.hidden, for: .navigationBar)
+        .preferredColorScheme(.dark)
+        .onAppear {
+            coinText = "\(farmCoins)"
+        }
+    }
+
+    private var background: some View {
+        HTAppBackground()
+    }
+
+    private var header: some View {
+        HStack(alignment: .top, spacing: scaled(12)) {
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: scaled(18), weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: scaled(44), height: scaled(44))
+                    .background(Color.white.opacity(0.06))
+                    .clipShape(Circle())
+                    .overlay(Circle().strokeBorder(Color.white.opacity(0.08), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Moedas")
+                    .font(.system(size: scaled(34), weight: .bold))
+                    .foregroundStyle(.white)
+
+                Text("Defina qualquer saldo para testar o jardim.")
+                    .font(.system(size: scaled(16), weight: .medium))
+                    .foregroundStyle(.white.opacity(0.62))
+                    .lineLimit(2)
+            }
+
+            Spacer()
+        }
+    }
+
+    private var editorCard: some View {
+        VStack(alignment: .leading, spacing: scaled(14)) {
+            Text("Saldo atual")
+                .font(.system(size: scaled(18), weight: .bold))
+                .foregroundStyle(.white)
+
+            HStack(spacing: scaled(12)) {
+                Image(systemName: "circle.hexagongrid.fill")
+                    .font(.system(size: scaled(22), weight: .bold))
+                    .foregroundStyle(.yellow)
+                    .frame(width: scaled(46), height: scaled(46))
+                    .background(Color.yellow.opacity(0.14))
+                    .clipShape(RoundedRectangle(cornerRadius: scaled(14), style: .continuous))
+
+                TextField("0", text: $coinText)
+                    .keyboardType(.numberPad)
+                    .textInputAutocapitalization(.never)
+                    .font(.system(size: scaled(22), weight: .bold))
+                    .foregroundStyle(.white)
+                    .tint(accent)
+                    .padding(.horizontal, scaled(14))
+                    .frame(height: scaled(48))
+                    .background(Color.black.opacity(0.28))
+                    .clipShape(RoundedRectangle(cornerRadius: scaled(14), style: .continuous))
+                    .overlay(cardStroke(cornerRadius: scaled(14)))
+                    .onChange(of: coinText) { _, newValue in
+                        applyCoinText(newValue)
+                    }
+            }
+
+            Button {
+                applyCoinText(coinText)
+            } label: {
+                Text("Aplicar")
+                    .font(.system(size: scaled(15), weight: .bold))
+                    .foregroundStyle(.black)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, scaled(12))
+                    .background(accent)
+                    .clipShape(RoundedRectangle(cornerRadius: scaled(15), style: .continuous))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(scaled(16))
+        .background(cardFill)
+        .clipShape(RoundedRectangle(cornerRadius: scaled(22), style: .continuous))
+        .overlay(cardStroke(cornerRadius: scaled(22)))
+    }
+
+    private var presetCard: some View {
+        VStack(alignment: .leading, spacing: scaled(12)) {
+            Text("Atalhos")
+                .font(.system(size: scaled(18), weight: .bold))
+                .foregroundStyle(.white)
+
+            HStack(spacing: scaled(8)) {
+                ForEach([0, 80, 500, 9999], id: \.self) { value in
+                    Button {
+                        farmCoins = value
+                        coinText = "\(value)"
+                    } label: {
+                        Text("\(value)")
+                            .font(.system(size: scaled(13), weight: .bold))
+                            .foregroundStyle(value == farmCoins ? .black : .white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, scaled(10))
+                            .background(value == farmCoins ? accent : Color.white.opacity(0.08))
+                            .clipShape(RoundedRectangle(cornerRadius: scaled(13), style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .padding(scaled(16))
+        .background(cardFill)
+        .clipShape(RoundedRectangle(cornerRadius: scaled(22), style: .continuous))
+        .overlay(cardStroke(cornerRadius: scaled(22)))
+    }
+
+    private func applyCoinText(_ value: String) {
+        let digits = value.filter(\.isNumber)
+        if digits != value {
+            coinText = digits
+            return
+        }
+
+        guard let amount = Int(digits) else {
+            farmCoins = 0
+            return
+        }
+
+        farmCoins = amount
     }
 
     private var cardFill: some ShapeStyle {

@@ -6,9 +6,10 @@ struct HabitTrackerApp: App {
 
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome: Bool = false
     @AppStorage("didScheduleNotifications") private var didScheduleNotifications: Bool = false
+    private let modelContainer: ModelContainer
 
     init() {
-        // ✅ 1ª aplicação (antes de montar a UI)
+        modelContainer = Self.makeModelContainer()
         HTAppearance.configureTabBarTransparent()
     }
 
@@ -17,30 +18,37 @@ struct HabitTrackerApp: App {
             if hasSeenWelcome {
                 RootTabView()
                     .onAppear {
-                        scheduleNotificationsIfNeeded()
-                        HTWatchBridge.shared.activateIfNeeded()
+                        startRuntimeServices()
                     }
             } else {
                 WelcomeView(
                     onContinue: {
                         hasSeenWelcome = true
-                        scheduleNotificationsIfNeeded()
-                        HTWatchBridge.shared.activateIfNeeded()
+                        startRuntimeServices()
                     },
                     onApple: {
                         hasSeenWelcome = true
-                        scheduleNotificationsIfNeeded()
-                        HTWatchBridge.shared.activateIfNeeded()
+                        startRuntimeServices()
                     },
                     onGoogle: {
                         hasSeenWelcome = true
-                        scheduleNotificationsIfNeeded()
-                        HTWatchBridge.shared.activateIfNeeded()
+                        startRuntimeServices()
                     }
                 )
             }
         }
-        .modelContainer(for: [HTHabit.self, HTHabitLog.self])
+        .modelContainer(modelContainer)
+    }
+
+    private func startRuntimeServices() {
+        #if DEBUG
+        return
+        #else
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            scheduleNotificationsIfNeeded()
+            HTWatchBridge.shared.activateIfNeeded()
+        }
+        #endif
     }
 
     private func scheduleNotificationsIfNeeded() {
@@ -55,5 +63,23 @@ struct HabitTrackerApp: App {
         ])
 
         didScheduleNotifications = true
+    }
+
+    private static func makeModelContainer() -> ModelContainer {
+        let schema = Schema([HTHabit.self, HTHabitLog.self])
+        let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+
+        do {
+            return try ModelContainer(for: schema, configurations: [configuration])
+        } catch {
+            print("Persistent SwiftData container failed:", error)
+        }
+
+        let fallbackConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+        do {
+            return try ModelContainer(for: schema, configurations: [fallbackConfiguration])
+        } catch {
+            fatalError("Unable to create fallback SwiftData container: \(error)")
+        }
     }
 }

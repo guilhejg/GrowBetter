@@ -6,137 +6,167 @@ struct WelcomeView: View {
     let onApple: () -> Void
     let onGoogle: () -> Void
 
+    @State private var step: WelcomeStep = .intro
+    @State private var guestName = ""
+
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            HTAppBackground()
 
-            // ✅ degradê azul que começa embaixo e vai até o meio
-            LinearGradient(
-                colors: [
-                    Color(red: 0.15, green: 1.0, blue: 0.20).opacity(0.65),
-                    Color(red: 0.10, green: 0.95, blue: 0.35).opacity(0.55),
-                    Color.clear
-                ],
-                startPoint: .bottom,
-                endPoint: .center
-            )
-            .ignoresSafeArea()
-
-            VStack(spacing: 0) {
-
-                Spacer(minLength: 28)
-
-                // ✅ personagem central preenchendo bem a tela
-                Image("hero_pixel")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: 340)
-                    .padding(.horizontal, 18)
-                    .shadow(color: .black.opacity(0.35), radius: 22, x: 0, y: 14)
-
-                Spacer(minLength: 18)
-
-                // ✅ bloco inferior com botões (topo inferior)
-                VStack(spacing: 12) {
-                    Text("GrowBetter")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundStyle(.white)
-                        .padding(.bottom, 2)
-
-                    Text("O gerenciador de hábitos que gamefica sua evolução")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.75))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 28)
-                        .padding(.bottom, 10)
-
-                    Button(action: onApple) {
-                        loginButton(
-                            title: "Continuar com Apple",
-                            systemImage: "apple.logo",
-                            fill: Color.white,
-                            textColor: Color.black.opacity(0.9)
-                        )
-                    }
-                    .buttonStyle(.plain)
-
-                    Button(action: onGoogle) {
-                        HStack(spacing: 10) {
-
-                            Image("google_logo")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 30, height: 30)
-
-                            Text("Continuar com Google")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(Color.white.opacity(0.92))
-
-                            Spacer()
-                        }
-                        .padding(.horizontal, 7)
-                        .frame(height: 52)
-                        .background(
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .fill(Color.white.opacity(0.14))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .strokeBorder(Color.white.opacity(0.10), lineWidth: 1)
-                        )
-                    }
-                    .buttonStyle(.plain)
-
-                    Button(action: onContinue) {
-                        loginButton(
-                            title: "Continuar sem conta",
-                            systemImage: "arrow.right",
-                            fill: Color.white.opacity(0.10),
-                            textColor: Color.white.opacity(0.85)
-                        )
-                    }
-                    .buttonStyle(.plain)
-
-                    Text("Você pode ativar login depois em Ajustes.")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.50))
-                        .padding(.top, 6)
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 26)
+            switch step {
+            case .intro:
+                introScreen
+            case .newUser:
+                newUserScreen
+            case .guestName:
+                guestNameScreen
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .animation(.easeInOut(duration: 0.22), value: step)
     }
 
-    // MARK: - UI
+    private var introScreen: some View {
+        VStack(spacing: 0) {
+            Spacer()
 
-    private func loginButton(
-        title: String,
-        systemImage: String,
-        fill: Color,
-        textColor: Color
-    ) -> some View {
-        HStack(spacing: 10) {
-            Image(systemName: systemImage)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(textColor)
+            mascotTitle("Bem vindo,\npequeno padawa")
+                .padding(.bottom, 138)
+
+            VStack(spacing: 12) {
+                welcomeButton("Eu não te conheço") {
+                    step = .newUser
+                }
+
+                welcomeButton("Eu já te conheço") {
+                    HTAccountSession.saveLocalSession(name: "Convidado")
+                    onApple()
+                }
+            }
+            .padding(.horizontal, 40)
+            .padding(.bottom, 42)
+        }
+        .transition(.opacity)
+    }
+
+    private var newUserScreen: some View {
+        VStack(spacing: 0) {
+            Spacer()
+
+            mascotTitle("Vamos lá,\nquem é você?")
+                .padding(.bottom, 138)
+
+            VStack(spacing: 12) {
+                welcomeButton("Cadastrar com sua conta Apple") {
+                    step = .guestName
+                }
+
+                welcomeButton("Entrar como convidado") {
+                    step = .guestName
+                }
+            }
+            .padding(.horizontal, 40)
+            .padding(.bottom, 42)
+        }
+        .transition(.opacity)
+    }
+
+    private var guestNameScreen: some View {
+        VStack(spacing: 0) {
+            Spacer()
+
+            VStack(spacing: 18) {
+                Image("agagblom_main")
+                    .resizable()
+                    .interpolation(.none)
+                    .scaledToFit()
+                    .frame(width: 150, height: 150)
+                    .shadow(color: .black.opacity(0.26), radius: 16, x: 0, y: 10)
+
+                Text("Qual o seu\nnome?")
+                    .font(.system(size: 24, weight: .heavy))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(-3)
+                    .minimumScaleFactor(0.82)
+
+                guestNameField
+                    .padding(.top, 20)
+            }
+            .padding(.bottom, 300)
+
+            welcomeButton("Entrar como convidado") {
+                HTAccountSession.saveGuestName(guestName)
+                onContinue()
+            }
+            .padding(.horizontal, 40)
+            .padding(.bottom, 42)
+        }
+        .transition(.opacity)
+    }
+
+    private func mascotTitle(_ title: String) -> some View {
+        VStack(spacing: 18) {
+            Image("agagblom_main")
+                .resizable()
+                .interpolation(.none)
+                .scaledToFit()
+                .frame(width: 150, height: 150)
+                .shadow(color: .black.opacity(0.26), radius: 16, x: 0, y: 10)
 
             Text(title)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(textColor)
-
-            Spacer()
+                .font(.system(size: 24, weight: .heavy))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+                .lineSpacing(-3)
+                .minimumScaleFactor(0.82)
         }
-        .padding(.horizontal, 14)
-        .frame(height: 52)
-        .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(fill)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.10), lineWidth: 1)
-        )
     }
+
+    private var guestNameField: some View {
+        ZStack(alignment: .leading) {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(Color(red: 0.09, green: 0.66, blue: 0.06))
+
+            if guestName.isEmpty {
+                Text("Seu nome")
+                    .font(.system(size: 18, weight: .heavy))
+                    .foregroundStyle(Color.black.opacity(0.30))
+                    .padding(.horizontal, 16)
+            }
+
+            TextField("", text: $guestName)
+                .font(.system(size: 18, weight: .heavy))
+                .foregroundStyle(.white)
+                .tint(.white)
+                .textInputAutocapitalization(.words)
+                .autocorrectionDisabled()
+                .padding(.horizontal, 16)
+        }
+        .frame(height: 47)
+        .padding(.horizontal, 40)
+    }
+
+    private func welcomeButton(_ title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 18, weight: .heavy))
+                .foregroundStyle(Color.black.opacity(0.92))
+                .lineLimit(1)
+                .minimumScaleFactor(0.84)
+                .frame(maxWidth: .infinity)
+                .frame(height: 47)
+                .background(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(Color(red: 0.66, green: 0.96, blue: 0.11))
+                )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private enum WelcomeStep: Equatable {
+    case intro
+    case newUser
+    case guestName
 }
